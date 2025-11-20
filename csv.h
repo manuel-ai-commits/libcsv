@@ -26,6 +26,10 @@ typedef struct CSV_BUFFER {
         char text_delim;
 } CSV_BUFFER;
 
+#define CSV_ENTRY(buf, i, j) ((buf).field[(i)][(j)]->text)
+#define CSV_ROWS(buf) (buf).rows
+#define CSV_COLS(buf, j) (buf).width[(j)]
+
 /* Function: add_char
  * ------------------
  * Appends a character to the end of a string, and increases 
@@ -262,6 +266,20 @@ int csv_clear_row(CSV_BUFFER *buffer, size_t row);
  *      reduces memory used, so reallocation should never fail)
  */
 int csv_remove_row(CSV_BUFFER *buffer, size_t row);
+
+/* Function: csv_remove_col
+ * ------------------------
+ * 
+ * Completely removes a col from the buffer such that it's two
+ * neighboring cols are now adjacent and buffer height is reduced
+ * by one.
+ *
+ * Returns:
+ *  0: success
+ *  1: memory allocation falirure (note this function only 
+ *      reduces memory used, so reallocation should never fail)
+ */
+ int csv_remove_col(CSV_BUFFER *buffer, size_t col);
 
 void csv_set_text_delim(CSV_BUFFER *buffer, char new_delim);
 
@@ -830,6 +848,22 @@ int csv_remove_field(CSV_BUFFER *buffer, size_t row, size_t entry)
         return 0;
 }
 
+
+int csv_remove_col(CSV_BUFFER *buffer, size_t col)
+{
+        
+        for (size_t i = 0; i < buffer->rows; i++){
+                for (size_t j = col; j < buffer->width[i]-1; j++) {
+                        if (col > buffer->width[i] - 1)
+                                return 0;
+                        csv_copy_field(buffer, i, j, buffer, i, j + 1);
+                }
+                remove_last_field(buffer, i);
+        }
+
+        return 0;
+}
+
 void csv_set_text_delim(CSV_BUFFER *buffer, char new_delim)
 {
         buffer->text_delim = new_delim;
@@ -900,7 +934,7 @@ int csv_insert_field(CSV_BUFFER *buffer, size_t row, size_t entry,
         return 0;
 }
 
-void print_buffer(CSV_BUFFER *buffer)
+void print_csv(CSV_BUFFER *buffer)
 {
         printf("\n");
         for (size_t i = 0; i < buffer->rows; i++) {
