@@ -26,9 +26,9 @@ typedef struct CSV_BUFFER {
         char text_delim;
 } CSV_BUFFER;
 
-#define CSV_ENTRY(buf, i, j) ((buf).field[(i)][(j)]->text)
-#define CSV_ROWS(buf) (buf).rows
-#define CSV_COLS(buf, j) (buf).width[(j)]
+#define CSV_ENTRY(buf, i, j) ((buf)->field[(i)][(j)]->text)
+#define CSV_ROWS(buf) (buf)->rows
+#define CSV_COLS(buf, j) (buf)->width[(j)]
 
 /* Function: add_char
  * ------------------
